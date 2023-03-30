@@ -49,11 +49,12 @@ def build_expression_tree(expression, variable_table, cur_line):
         root.right_value = build_expression_tree(expression[min_operator + 1:], variable_table, cur_line)
         root.left_value = build_expression_tree(expression[:min_operator], variable_table, cur_line)
 
-        if root.left_value.expression_result_type != "Const" and root.right_value.expression_result_type != "Const":
-            if root.left_value.expression_result_type != root.right_value.expression_result_type:
-                print(
-                    f"Semantic error: the types of l_value and r_value are not equal '{expression}' at line {expression[0].line} column {expression[0].column}")
-                sys.exit()
+        if root.left_value is not None and root.right_value is not None:
+            if root.left_value.expression_result_type != "Const" and root.right_value.expression_result_type != "Const":
+                if root.left_value.expression_result_type != root.right_value.expression_result_type:
+                    print(
+                        f"Semantic error: the types of l_value and r_value are not equal '{expression}' at line {expression[0].line} column {expression[0].column}")
+                    sys.exit()
 
         root.expression_result_type = root.left_value.expression_result_type
     else:
@@ -142,7 +143,7 @@ def build_tree(tokens):
                         sys.exit()
                     if tokens[index + 1].token_type != "VARIABLE":
                         print(
-                            f"Semantic error: l_value could be constant '{tokens[index + 1].value}' at line {tokens[index + 1].line}, column {tokens[index + 1].column}")
+                            f"Semantic error: l_value could be non constant '{tokens[index + 1].value}' at line {tokens[index + 1].line}, column {tokens[index + 1].column}")
                         sys.exit()
                     if tokens[index + 1].value in variable_table:
                         print(
@@ -178,9 +179,14 @@ def build_tree(tokens):
                 cur_node.children.append(new_node)
                 index += 1
             else:
-                print(
-                    f"Semantic error: l_value could be constant '{tokens[index + 1].value}' at line {tokens[index + 1].line}, column {tokens[index + 1].column}")
-                sys.exit()
+                if tokens[index + 1].token_type == "ARITHMETIC_OPERATION":
+                    print(
+                        f"Syntax error: expected variable but found '{tokens[index + 1].value}' at line {tokens[index + 1].line}, column {tokens[index + 1].column}")
+                    sys.exit()
+                else:
+                    print(
+                        f"Semantic error: l_value could be non constant '{tokens[index + 1].value}' at line {tokens[index + 1].line}, column {tokens[index + 1].column}")
+                    sys.exit()
 
         elif tokens[index].value == "for":
             new_node = ForNode("For_node", VariableNode("Variable_node"), ExpressionNode("Expression_node", ""),
@@ -194,7 +200,7 @@ def build_tree(tokens):
                 sys.exit()
             if tokens[index + 1].token_type != "VARIABLE":
                 print(
-                    f"Semantic error: l_value could be constant '{tokens[index + 1].value}' at line {tokens[index + 1].line}, column {tokens[index + 1].column}")
+                    f"Semantic error: l_value could be non constant '{tokens[index + 1].value}' at line {tokens[index + 1].line}, column {tokens[index + 1].column}")
                 sys.exit()
 
             new_node.variable_node.variable_type = tokens[index].value

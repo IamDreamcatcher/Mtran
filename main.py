@@ -25,7 +25,7 @@ def print_tok(tokens_list):
 
 
 if __name__ == "__main__":
-    cpp_file = "example.cpp"
+    cpp_file = "1.cpp"
     with open(cpp_file, "r") as file:
         code = (file.read())
     custom_lexer = Lexer()
