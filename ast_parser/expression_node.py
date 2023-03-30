@@ -7,3 +7,4 @@ class ExpressionNode(Node):
         self.left_value = None
         self.operator = operator
         self.right_value = None
+        self.expression_result_type = ""

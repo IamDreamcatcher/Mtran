@@ -6,4 +6,7 @@ class CustomToken:
         self.column = column
 
     def __str__(self):
-        return f"token with value: {self.value}, type: {self.token_type}, line {self.line}, column {self.column}"
+        return self.value
+
+    def __repr__(self):
+        return self.value
