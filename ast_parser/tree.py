@@ -14,7 +14,6 @@ from ast_parser.variable_node import VariableNode
 
 
 def parse_statement(parent_node, statement, variable_table, cur_line):
-
     new_node = build_expression_tree(statement, variable_table, cur_line)
 
     if new_node is not None:
@@ -39,7 +38,8 @@ def build_expression_tree(expression, variable_table, cur_line):
                 min_operator = i
                 maximum_parentheses = parentheses_count
         elif parentheses_count == maximum_parentheses:
-            if expression[i].token_type == "ARITHMETIC_OPERATION" and get_priority(expression[i].value) < min_precedence:
+            if expression[i].token_type == "ARITHMETIC_OPERATION" and get_priority(
+                    expression[i].value) < min_precedence:
                 min_precedence = get_priority(expression[i].value)
                 min_operator = i
 
@@ -78,7 +78,8 @@ def build_expression_tree(expression, variable_table, cur_line):
                     statement.append(expression[index])
                     index += 1
 
-                root.left_value.array_index = parse_statement(root.left_value.array_index, statement, variable_table, cur_line)
+                root.left_value.array_index = parse_statement(root.left_value.array_index, statement, variable_table,
+                                                              cur_line)
 
             root.expression_result_type = root.left_value.variable_type
         else:
@@ -292,7 +293,7 @@ def build_tree(tokens):
             index += 2
 
             statement = []
-            while tokens[index].value != ")":
+            while index < len(tokens) and tokens[index].value != ")":
                 statement.append(tokens[index])
                 index += 1
 
@@ -300,8 +301,10 @@ def build_tree(tokens):
             index += 1
             new_node.parent = cur_node
             cur_node.children.append(new_node)
+            cur_node = new_node
         elif tokens[index].value == "else":
-            if len(cur_node.children) == 0 or (cur_node.children[-1].node_type != "If_node" and (len(cur_node.children) > 1 and cur_node.children[-2].node_type != "If_node")):
+            if len(cur_node.children) == 0 or (cur_node.children[-1].node_type != "If_node" and (
+                    len(cur_node.children) > 1 and cur_node.children[-2].node_type != "If_node")):
                 print(
                     f"Syntax error: expected if before but found '{tokens[index].value}' at line {tokens[index].line}, column {tokens[index].column}")
                 sys.exit()
@@ -319,6 +322,7 @@ def build_tree(tokens):
 
             new_node.parent = cur_node
             cur_node.children.append(new_node)
+            cur_node = new_node
         elif tokens[index].value == "cout":
             new_node = BuildInNode("Build_in_node")
 
@@ -386,6 +390,8 @@ def build_tree(tokens):
 
         elif tokens[index].value == "}":
             cur_node = cur_node.parent
+            if cur_node.node_type == "If_node":
+                cur_node = cur_node.parent
             index += 1
         elif tokens[index].value == ";":
             if cur_node.node_type == "Variable_node" or cur_node.node_type == "Func_node":
@@ -399,6 +405,23 @@ def build_tree(tokens):
                 f"Syntax error: unexpected character '{tokens[index].value}' at line {tokens[index].line}, column {tokens[index].column}")
             sys.exit()
     return root
+
+
+def get_tree(tokens_list):
+    tree_list = []
+    func_table = {}
+    flag = 0
+    for token in tokens_list:
+        func_table[token[0]] = True
+        tree_list.append((token[0], build_tree(token[1])))
+        if token[0] == "main":
+            flag = 1
+
+    if flag != 1:
+        print(f"Function main should be exist")
+        exit()
+
+    return tree_list
 
 
 def print_ast(node, indent):
@@ -464,7 +487,6 @@ def print_ast(node, indent):
 
         return node.variable_type
     for child in node.children:
-        # print(f"{node.node_type} {child.node_type}")
         print_ast(child, indent + 2)
 
     if node.node_type == "Block_node":
