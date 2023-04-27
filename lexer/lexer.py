@@ -58,6 +58,8 @@ class Lexer:
                         self.tokens.append(token)
                         self.col_num += len(text)
                     elif tag == "identifier":
+                        if text[0] == "*":
+                            text = text[1:]
                         token = CustomToken(text, syntax_types[tag], self.line_num, self.col_num)
                         for item in self.func_list:
                             if item[0] == text:

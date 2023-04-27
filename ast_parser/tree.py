@@ -74,7 +74,7 @@ def build_expression_tree(expression, variable_table, cur_line):
             if len(expression) > 1 and expression[1].value == "[":
                 index = 1
                 statement = []
-                while expression[index].value != "]":
+                while index < len(expression) and expression[index].value != "]":
                     statement.append(expression[index])
                     index += 1
 
@@ -329,7 +329,7 @@ def build_tree(tokens):
             new_node.function_name = "cout"
             index += 1
 
-            while tokens[index].value != ";":
+            while index + 1 < len(tokens) and tokens[index].value != ";":
                 index += 1
                 new_node.arguments.append(tokens[index])
                 index += 1
@@ -372,6 +372,9 @@ def build_tree(tokens):
             index += 2
 
             while tokens[index].value != ")":
+                if tokens[index].value == ",":
+                    index += 1
+                    continue
                 var_node = copy.deepcopy(variable_table[tokens[index].value])
                 var_node.children = []
                 new_node.arguments.append(var_node)
