@@ -22,6 +22,7 @@ def parse_statement(parent_node, statement, variable_table, cur_line):
 
 
 def build_expression_tree(expression, variable_table, cur_line):
+    return None
     if not expression:
         return None
     min_operator = None
